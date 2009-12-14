@@ -1,0 +1,74 @@
+ActivityStream
+==============
+
+A dead easy way to log activity streams.
+
+Installation
+============
+
+ script/plugin install http://github.com/evilmarty/activity_stream
+
+Then run...
+
+ script/generate activity_stream
+ 
+this will create the Activity model and place it in your app/models path as a migration file.
+
+
+DON'T FORGET to add :activity_observer to your config.active_record.observers in environments.rb like so...
+
+ config.active_record.observers = :activity_observer
+
+Usage
+=====
+
+For all the models you want to log an activity for do the following...
+
+ class Comment < ActiveRecord::Base
+   log_activities
+ end
+ 
+this will log an activity for :create, :update and :destroy. To only log an activity for :create simply say so...
+
+ class Comment < ActiveRecord::Base
+   log_activities :create
+ end
+ 
+You can also pass a Proc which can be used to check whether to log the activity or not, just return false
+
+ class Comment < ActiveRecord::Base
+   log_activities :create, :destroy
+   log_activities :update do |record|
+     record.status == 1
+   end
+ end
+ 
+and you can call it multiple times for different actions with different Procs
+
+
+Now once your done with your logging, it's time to define your actors. Like so...
+
+ class User < ActiveRecord::Base
+   acts_as_actor
+ end
+ 
+and now when you want to log activities simply do the following in your controllers or wherever you please
+
+ class CommentsController < ApplicationController
+   def create
+     current_user.log_activity('web') do
+       Comment.create params[:comment]
+     end
+   end
+ end
+ 
+that little argument for log_activity is the context of the activity but you can omit it should you feel so.
+
+TODO
+====
+
+* write better doc
+* create tests
+* add support for indirect objects maybe?
+
+Copyright (c) 2009 Marty Zalega (evil.marty@gmail.com), released under the MIT license
