@@ -1,0 +1,14 @@
+witty_comment:
+  id: 1
+  person_id: 1
+  message: "Birdman is better!"
+  
+plea_comment:
+  id: 2
+  person_id: 1
+  message: "I beg of you wont someone please think of the children"
+  
+robbery:
+  id: 3
+  person_id: 2
+  message: "Nobody this is a robbery!"

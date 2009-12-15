@@ -68,7 +68,6 @@ TODO
 ====
 
 * write better doc
-* create tests
 * add support for indirect objects maybe?
 
 Copyright (c) 2009 Marty Zalega (evil.marty@gmail.com), released under the MIT license

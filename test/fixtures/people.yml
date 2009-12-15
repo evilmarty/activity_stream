@@ -1,0 +1,9 @@
+john:
+  id: 1
+  firstname: John
+  lastname: Doe
+
+jane:
+  id: 2
+  firstname: Jane
+  lastname: Doe

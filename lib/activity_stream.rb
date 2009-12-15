@@ -16,7 +16,9 @@ module ActivityStream
       args.each { |verb| activity_callbacks["after_#{verb}".intern] = callback }
       write_inheritable_attribute :activity_callbacks, activity_callbacks
       
-      add_observer ActivityObserver.instance
+      add_observer ActivityObserver.instance unless defined? @_activity_observed
+      # to ensure we don't add the observer multiple times
+      @_activity_observed = true
     end
     
     def skip_log_activity(*args)

@@ -1,0 +1,22 @@
+sqlite3:
+  database: ":memory:"
+  adapter: sqlite3
+  timeout: 500
+ 
+sqlite2:
+  database: ":memory:"
+  adapter: sqlite2
+ 
+mysql:
+  adapter: mysql
+  username: root
+  password: 
+  encoding: utf8
+  database: activity_stream_unittest
+ 
+postgres:
+  adapter: postgresql
+  username: root
+  password: 
+  database: activity_stream_unittest
+  min_messages: warning
