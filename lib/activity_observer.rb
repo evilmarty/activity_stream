@@ -9,12 +9,13 @@ class ActivityObserver < ActiveRecord::Observer
   def update(observed_method, object)
     # check the object isn't an activity
     return if object.is_a? Activity
-    activity_stream, block = Thread.current[:activity_stream], object.class.activity_callbacks[observed_method]
+    context, block = Thread.current[:activity_stream_context], object.class.activity_triggers[observed_method]
     # lets not log an activity if we don't have an actor or isn't an allowed callback
-    return unless !!activity_stream and (block.is_a?(Proc) ? block.call(object) != false : block == true)
+    return unless !!context and (block.is_a?(Proc) ? block.call(object) != false : block == true)
     
+    indirect_object = context.indirect_object || object.instance_variable_get('@_indirect_object')
     verb = observed_method.to_s.gsub /^after_/, ''
     
-    Activity.create(:object => object, :actor => activity_stream[:actor], :verb => verb, :context => activity_stream[:context])
+    Activity.create(:object => object, :actor => context.actor, :verb => verb, :context => context, :indirect_object => indirect_object)
   end
 end

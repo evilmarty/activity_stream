@@ -4,6 +4,7 @@ class CreateActivities < ActiveRecord::Migration
       t.string :verb, :null => false, :limit => 24
       t.references :actor, :polymorphic => true
       t.references :object, :polymorphic => true
+      t.references :indirect_object, :polymorphic => true
       t.string :context, :limit => 32
       t.datetime :timestamp, :null => false
     end

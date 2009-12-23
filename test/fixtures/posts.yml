@@ -1,0 +1,9 @@
+simple_post:
+  id: 1
+  message: "Blah blah blah, yap yap yap"
+  person_id: 1
+
+simpler_post:
+  id: 2
+  message: "hello!"
+  person_id: 2

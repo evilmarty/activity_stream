@@ -14,11 +14,11 @@ class ActivityStreamTest < ActiveSupport::TestCase
   def test_model_activity_setup
     assert @comment = Comment.first
     assert_respond_to Comment, :log_activities
-    assert_respond_to Comment, :activity_callbacks
-    assert_instance_of Hash, Comment.activity_callbacks
-    assert_equal true, Comment.activity_callbacks[:after_create]
-    assert_instance_of Proc, Comment.activity_callbacks[:after_update]
-    assert_instance_of Proc, Comment.activity_callbacks[:after_destroy]
+    assert_respond_to Comment, :activity_triggers
+    assert_instance_of Hash, Comment.activity_triggers
+    assert_equal true, Comment.activity_triggers[:after_create]
+    assert_instance_of Proc, Comment.activity_triggers[:after_update]
+    assert_instance_of Proc, Comment.activity_triggers[:after_destroy]
     assert_equal 1, Comment.count_observers
   end
   
@@ -28,13 +28,38 @@ class ActivityStreamTest < ActiveSupport::TestCase
   
   def test_log_activity
     assert @person = Person.first
-    assert_equal Activity.count, 0
+    Activity.delete_all
     @person.log_activity do
       @comment = @person.comments.build(:message => "I'm going to leave an activity")
       assert @comment.save
     end
     assert @activity = Activity.first
-    assert_equal @activity.actor, @person
-    assert_equal @activity.object, @comment
+    assert_equal @person, @activity.actor
+    assert_equal @comment, @activity.object
+  end
+  
+  def test_indirect_object
+    Activity.delete_all
+    assert @person = Person.last
+    assert @post = Post.first
+    assert @comment = @post.comments.build(:message => 'testing indirect object')
+    
+    @person.log_activity do
+      assert @comment.save
+    end
+    assert_equal @post, Activity.first.indirect_object
+  end
+  
+  def test_explicit_indirect_object
+    Activity.delete_all
+    assert @person = Person.last
+    assert @post = Post.first
+    assert @other_post = Post.last
+    assert_not_equal @post, @other_post
+    
+    @person.log_activity_indirectly_for(@other_post) do
+      assert @post.comments.create :message => 'testing explicit indirect'
+    end
+    assert_equal @other_post, Activity.first.indirect_object
   end
 end

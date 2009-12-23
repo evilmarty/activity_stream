@@ -1,5 +1,6 @@
 class Comment < ActiveRecord::Base
   belongs_to :person
+  belongs_to :post
   
   log_activities :create
   log_activities :update do |record|

@@ -3,6 +3,7 @@ class Activity < ActiveRecord::Base
   
   belongs_to :actor, :polymorphic => true
   belongs_to :object, :polymorphic => true
+  belongs_to :indirect_object, :polymorphic => true
   
   validates_presence_of :actor, :object, :verb
   
