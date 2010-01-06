@@ -20,6 +20,9 @@ class ActivityStreamTest < ActiveSupport::TestCase
     assert_instance_of Proc, Comment.activity_triggers[:after_update]
     assert_instance_of Proc, Comment.activity_triggers[:after_destroy]
     assert_equal 1, Comment.count_observers
+    assert_respond_to @comment, :activities
+    assert_respond_to @comment.activities, :indirectly
+    assert_respond_to @comment.activities, :directly
   end
   
   def test_activity_observer

@@ -13,9 +13,11 @@ class ActivityObserver < ActiveRecord::Observer
     # lets not log an activity if we don't have an actor or isn't an allowed callback
     return unless !!context and (block.is_a?(Proc) ? block.call(object) != false : block == true)
     
-    indirect_object = context.indirect_object || object.instance_variable_get('@_indirect_object')
     verb = observed_method.to_s.gsub /^after_/, ''
     
-    Activity.create(:object => object, :actor => context.actor, :verb => verb, :context => context, :indirect_object => indirect_object)
+    attributes = context.attributes.merge :verb => verb, :object => object
+    attributes[:indirect_object] ||= object.instance_variable_get('@_indirect_object')
+    
+    Activity.create(attributes)
   end
 end

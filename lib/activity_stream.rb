@@ -1,12 +1,9 @@
 module ActivityStream
   class Context
-    attr_reader :options, :name, :actor, :indirect_object
+    attr_reader :attributes
     
-    def initialize(options = {})
-      @options = options
-      @name = @options.delete(:context)
-      @actor = @options.delete(:actor)
-      @indirect_object = @options.delete(:indirect_object)
+    def initialize(attributes = {})
+      @attributes = attributes
     end
     
     def call(&block)
@@ -19,7 +16,9 @@ module ActivityStream
       Thread.current[:activity_stream_context] = current_context
     end
     
-    alias_method :to_s, :name
+    def to_s
+      attributes[:context].to_s
+    end
   end
   
   module ActiveRecord
@@ -39,10 +38,34 @@ module ActivityStream
         callback = block_given?? block : true
         args.each { |verb| activity_triggers["after_#{verb}".intern] = callback }
         write_inheritable_attribute :activity_triggers, activity_triggers
-      
-        add_observer ActivityObserver.instance unless defined? @_activity_observed
-        # to ensure we don't add the observer multiple times
-        @_activity_observed = true
+        
+        unless defined? @_activity_observed
+          has_many :activities, :as => :object do
+            def all(options = {})
+              klass = proxy_owner.klass
+              Scope.new scope_for_reflection(:find => {:conditions => ['object_type = ? OR indirect_object_type = ?', klass.name, klass.name]}), :find => options
+            end
+            
+            def indirectly(options = {})
+              klass = proxy_owner.klass
+              Scope.new scope_for_reflection(:find => {:conditions => {:indirect_object_type => klass.name}}), :find => options
+            end
+            
+            def directly(options = {})
+              klass = proxy_owner.klass
+              Scope.new scope_for_reflection(:find => {:conditions => {:object_type => klass.name}}), :find => options
+            end
+            
+          private
+            def scope_for_reflection(options)
+              Scope.new proxy_reflection.klass, options
+            end
+          end
+          
+          add_observer ActivityObserver.instance
+          # to ensure we don't add the observer multiple times
+          @_activity_observed = true
+        end
       end
     
       def skip_log_activity(*args)
